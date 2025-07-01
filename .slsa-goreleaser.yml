@@ -1,24 +1,29 @@
+# Version for this file.
 version: 1
 
-build:
-  goos: linux
-  goarch: amd64
-  env:
-    - CGO_ENABLED=0
-  flags:
-    - -trimpath
-  ldflags:
-    - -s -w
-  main: ./cmd/server/main.go
-  output-artifact: dist/app
+# (Optional) List of env variables used during compilation.
+env:
+  - GO111MODULE=on
+  - CGO_ENABLED=0
 
-kos:
-  - repository: ghcr.io/goreleaser/goreleaser-example-slsa-provenance
-    tags:
-      - "{{ .Tag }}"
-      - "{{ if not .Prerelease }}latest{{ end }}"
-    bare: true
-    preserve_import_paths: false
-    sbom: none
-    platforms:
-      - linux/amd64
+# (Optional) Flags for the compiler.
+flags:
+  - -trimpath
+  - -tags=netgo
+
+# The OS to compile for. `GOOS` env variable will be set to this value.
+goos: linux
+
+# The architecture to compile for. `GOARCH` env variable will be set to this value.
+goarch: amd64
+
+# (Optional) Entrypoint to compile.
+# main: ./path/to/main.go
+
+# (Optional) Working directory. (default: root of the project)
+# dir: ./relative/path/to/dir
+
+# Binary output name.
+# {{ .Os }} will be replaced by goos field in the config file.
+# {{ .Arch }} will be replaced by goarch field in the config file.
+binary: binary-{{ .Os }}-{{ .Arch }}
