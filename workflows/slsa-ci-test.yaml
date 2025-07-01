@@ -1,0 +1,119 @@
+name: Run golang1-build1 on Push
+run-name: ${{ github.event.head_commit.message }} (${{ github.actor }})
+"on":
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    permissions:
+      id-token: write # To sign the provenance.
+      contents: write # To upload assets to release.
+      actions: read # To read the workflow path.
+    needs:
+      - initialize
+    uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v2.1.0
+    with:
+      go-version: 1.17
+    strategy:
+      matrix:
+        go-version:
+          - stable
+  initialize:
+    runs-on:
+      - ubuntu-latest
+    name: ""
+    steps:
+      - id: branch-check
+        name: Branch Verification
+        run: |2
+          echo "ERROR: You can only merge to main from [release/* hotfix/*]"
+          exit 1
+        if: '!contains(github.head_ref, ''release/'') && !contains(github.head_ref, ''hotfix/'')'
+      - id: checkout
+        name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: webiny/action-conventional-commits@v1.3.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - id: get-merged-pull-request
+        uses: actions-ecosystem/action-get-merged-pull-request@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - id: release-label
+        uses: actions-ecosystem/action-release-label@v1
+        with:
+          labels: ${{ steps.get-merged-pull-request.outputs.labels }}
+        if: ${{ steps.get-merged-pull-request.outputs.title != null }}
+      - id: get-latest-tag
+        uses: actions-ecosystem/action-get-latest-tag@v1
+        with:
+          semver_only: true
+      - id: bump-semver
+        uses: actions-ecosystem/action-bump-semver@v1
+        with:
+          current_version: ${{ steps.get-latest-tag.outputs.tag }}
+          level: ${{ steps.release-label.outputs.level  || 'patch' }}
+      - id: harden-runner
+        uses: step-security/harden-runner@v2.10.2
+        with:
+          egress-policy: audit
+    outputs:
+      current_version: ${{ steps.get-latest-tag.outputs.tag }}
+      target_version: ${{ steps.bump-semver.outputs.new_version }}
+  test:
+    runs-on:
+      - ubuntu-latest
+    name: ""
+    steps:
+      - id: checkout
+        name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - id: setup-go
+        name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+      - id: install-dep
+        name: Install dependencies
+        run: go get .
+      - id: go_generate
+        name: Run generate
+        run: go generate ./...
+      - id: go-test
+        name: Run Tests
+        run: go test ./...
+    strategy:
+      matrix:
+        go-version:
+          - stable
+    needs:
+      - initialize
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
+
+
+
+build:
+  needs: initialize
+  permissions:
+    id-token: write     # Needed to sign the provenance.
+    contents: write     # Needed to upload build artifacts or release assets.
+    actions: read       # Needed to access the workflow file path.
+  strategy:
+    matrix:
+      os: [linux]
+      arch: [amd64]
+  uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v2.1.0
+  with:
+    go-version: stable
+    config-file: .slsa-goreleaser/${{ matrix.os }}-${{ matrix.arch }}.yml
