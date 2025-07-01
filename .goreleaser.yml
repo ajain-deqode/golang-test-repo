@@ -1,0 +1,19 @@
+---
+builds:
+  - env:
+      - CGO_ENABLED=0
+
+kos:
+  - repository: ghcr.io/goreleaser/goreleaser-example-slsa-provenance
+    tags:
+      - "{{.Tag}}"
+      - "{{ if not .Prerelease }}latest{{ end }}"
+    bare: true
+    preserve_import_paths: false
+    sbom: none
+    platforms:
+      - all
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
