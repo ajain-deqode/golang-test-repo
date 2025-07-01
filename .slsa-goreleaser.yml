@@ -1,19 +1,22 @@
----
-builds:
-  - env:
-      - CGO_ENABLED=0
+build:
+  goos: linux
+  goarch: amd64
+  env:
+    - CGO_ENABLED=0
+  flags:
+    - -trimpath
+  ldflags:
+    - -s -w
+  main: ./cmd/server/main.go
+  output-artifact: dist/app
 
 kos:
   - repository: ghcr.io/goreleaser/goreleaser-example-slsa-provenance
     tags:
-      - "{{.Tag}}"
+      - "{{ .Tag }}"
       - "{{ if not .Prerelease }}latest{{ end }}"
     bare: true
     preserve_import_paths: false
     sbom: none
     platforms:
-      - all
-    flags:
-      - -trimpath
-    ldflags:
-      - -s -w
+      - linux/amd64
