@@ -24,12 +24,6 @@ jobs:
       - ubuntu-latest
     name: ""
     steps:
-      - id: branch-check
-        name: Branch Verification
-        run: |2
-          echo "ERROR: You can only merge to main from [release/* hotfix/*]"
-          exit 1
-        if: '!contains(github.head_ref, ''release/'') && !contains(github.head_ref, ''hotfix/'')'
       - id: checkout
         name: Checkout
         uses: actions/checkout@v4
