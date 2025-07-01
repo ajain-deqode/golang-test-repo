@@ -14,7 +14,7 @@ jobs:
       - initialize
     uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v2.1.0
     with:
-      go-version: 1.17
+      go-version: ${{ matrix.go-version }}
     strategy:
       matrix:
         go-version:
@@ -98,22 +98,3 @@ jobs:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
-
-
-
-
-build:
-  needs: initialize
-  permissions:
-    id-token: write     # Needed to sign the provenance.
-    contents: write     # Needed to upload build artifacts or release assets.
-    actions: read       # Needed to access the workflow file path.
-  strategy:
-    matrix:
-      os: [linux]
-      arch: [amd64]
-  uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v2.1.0
-  with:
-    go-version: stable
-    config-file: .slsa-goreleaser/${{ matrix.os }}-${{ matrix.arch }}.yml
