@@ -74,9 +74,6 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
-      - id: install-dep
-        name: Install dependencies
-        run: go get .
       - id: go_generate
         name: Run generate
         run: go generate ./...
