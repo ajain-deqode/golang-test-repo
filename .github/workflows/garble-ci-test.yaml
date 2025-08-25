@@ -9,6 +9,18 @@ jobs:
         runs-on:
         - ubuntu-latest
         steps:
+        - id: checkout
+          name: Checkout
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+            fetch-tags: true
+        - id: setup-go
+          name: Setup Go
+          uses: actions/setup-go@v5
+          with:
+            go-version: stable
+        
         - name: Install Garble
           run: go install mvdan.cc/garble@latest
 
