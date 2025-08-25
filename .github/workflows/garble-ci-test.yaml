@@ -1,0 +1,17 @@
+name: Run golang1-build1 on Push
+run-name: ${{ github.event.head_commit.message }} (${{ github.actor }})
+"on":
+  push:
+    branches:
+      - main
+jobs:
+    garble-build:
+        runs-on:
+        - ubuntu-latest
+        steps:
+        - name: Install Garble
+          run: go install mvdan.cc/garble@latest
+
+        - name: Garble Build
+          run: garble build ./cmd/server 
+
