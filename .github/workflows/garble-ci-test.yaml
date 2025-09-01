@@ -22,7 +22,7 @@ jobs:
             go-version: "1.24.1"
         
         - name: Install Garble
-          run: go install mvdan.cc/garble@latest
+          run: go install github.com/ajain-deqode/garble@v0.0.0-20250807231722-1b9c305df242
 
         - name: Garble Build
           run: garble build ./cmd/server 
