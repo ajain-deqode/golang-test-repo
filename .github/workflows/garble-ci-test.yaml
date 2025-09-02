@@ -19,13 +19,10 @@ jobs:
           name: Setup Go
           uses: actions/setup-go@v5
           with:
-            go-version: "1.24.1"
-
-        - name: Get Garble
-          run: go get github.com/ajain-deqode/garble@v0.0.0-20250807231722-1b9c305df242
+            go-version: stable
         
         - name: Install Garble
-          run: go install github.com/ajain-deqode/garble@v0.0.0-20250807231722-1b9c305df242
+          run: go install mvdan.cc/garble@master
 
         - name: Garble Build
           run: garble build ./cmd/server 
